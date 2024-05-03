@@ -14,9 +14,9 @@ function Board() {
 
     function generateEdges(vertex) {
       const coords = vertex.square;
-      const children = getChildren(coords)
-      children.forEach(child => vertex.children.push(child));
-      console.log(`Knight on ${vertex.square} can move to:`)
+      const children = getChildren(coords);
+      children.forEach((child) => vertex.children.push(child));
+      console.log(`Knight on ${vertex.square} can move to:`);
       console.table(children);
     }
 
@@ -57,7 +57,29 @@ function Board() {
       return true;
     }
   }
-  return { buildGraph, list };
+
+  function breadthFirstSearch(vertex) {
+    
+    breadthRecursive();
+   
+
+    function breadthRecursive(queue = [vertex]) {
+      if (queue.length === 0) return null;
+      const node = queue.shift();
+      node.visited = true;
+      console.log(node.square);
+      
+      for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        if (child.visited === false){
+             queue.push(child);
+             child.visited = true;
+        }
+      }
+      breadthRecursive(queue);
+    }
+  }
+  return { buildGraph, list, breadthFirstSearch };
 }
 
 function Node(coordinates) {
@@ -75,4 +97,4 @@ function Node(coordinates) {
 
 let chess = Board();
 chess.buildGraph();
-console.log(chess.list[0].children)
+chess.breadthFirstSearch(chess.list[0]);
