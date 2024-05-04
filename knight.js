@@ -1,6 +1,5 @@
 function Board() {
   const boardWidth = 8;
-  const boardSize = boardWidth * boardWidth;
   const list = [];
   function buildGraph() {
     for (let i = 0; i < boardWidth; i++) {
@@ -16,8 +15,6 @@ function Board() {
       const coords = vertex.square;
       const children = getChildren(coords);
       children.forEach((child) => vertex.children.push(child));
-      console.log(`Knight on ${vertex.square} can move to:`);
-      console.table(children);
     }
 
     function getChildren(coords) {
@@ -43,43 +40,79 @@ function Board() {
       }
       return children;
     }
-
-    function getIndex(coords) {
-      //index of vertex === i * boardWidth + j
-      const i = coords[0] * boardWidth + coords[1];
-      return i;
-    }
-
-    function validateCoords(coords) {
-      if (coords[0] < 0 || coords[0] > 7 || coords[1] < 0 || coords[1] > 7) {
-        return false;
-      }
-      return true;
-    }
   }
 
-  function breadthFirstSearch(vertex) {
-    
-    breadthRecursive();
-   
+  function getIndex(coords) {
+    //index of vertex === i * boardWidth + j
+    const i = coords[0] * boardWidth + coords[1];
+    return i;
+  }
 
-    function breadthRecursive(queue = [vertex]) {
-      if (queue.length === 0) return null;
+  function validateCoords(coords) {
+    if (coords[0] < 0 || coords[0] > 7 || coords[1] < 0 || coords[1] > 7) {
+      return false;
+    }
+    return true;
+  }
+
+  function knightMoves(startCoords, endCoords) {
+    const moveValid = validateMove(startCoords, endCoords)
+    if(moveValid){
+    const startIndex = getIndex(startCoords);
+    const endIndex = getIndex(endCoords);
+
+    const start = list[startIndex];
+    const end = list[endIndex];
+
+    const path = breadthFirstSearch(start, end);
+    return path;
+    } 
+    return null
+  }
+
+  function validateMove(start, end) {
+    let isValid = false;
+    isValid = validateCoords(start);
+    isValid = validateCoords(end);
+
+    if(!isValid) console.error('Enter valid coordinates!');
+
+    return isValid;
+  }
+
+  function breadthFirstSearch(start, end) {
+    const shortestPath = [];
+    breadthRecursive();
+
+    function findPath(node) {
+      while (node != null) {
+        shortestPath.unshift(node.square);
+        node = node.parent;
+      }
+    }
+
+    function breadthRecursive(queue = [start]) {
       const node = queue.shift();
       node.visited = true;
-      console.log(node.square);
-      
+
       for (let i = 0; i < node.children.length; i++) {
         const child = node.children[i];
-        if (child.visited === false){
-             queue.push(child);
-             child.visited = true;
+        if (child.visited === false) {
+          queue.push(child);
+          child.parent = node;
+          child.visited = true;
+          if (child.square === end.square) {
+            const targetNode = child;
+            findPath(targetNode);
+            return null;
+          }
         }
       }
       breadthRecursive(queue);
     }
+    return shortestPath;
   }
-  return { buildGraph, list, breadthFirstSearch };
+  return { buildGraph, list, breadthFirstSearch, knightMoves };
 }
 
 function Node(coordinates) {
@@ -95,6 +128,8 @@ function Node(coordinates) {
   };
 }
 
-let chess = Board();
+const chess = Board();
 chess.buildGraph();
-chess.breadthFirstSearch(chess.list[0]);
+const path = chess.knightMoves([0, 0], [3, 7]);
+
+console.log(path);
